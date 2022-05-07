@@ -1,4 +1,3 @@
-from urllib import response
 from fastapi.testclient import TestClient
 
 from main import app
@@ -18,3 +17,4 @@ def test_calculate_score():
         }
     )
     assert response.status_code == 200
+    assert response.json() == {"A": 1.75, "B": 1.5, "C": 1.0}
