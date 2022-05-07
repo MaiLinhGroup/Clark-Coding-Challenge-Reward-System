@@ -34,6 +34,9 @@ Temporary Items
 # Pyenv virtualenv
 .python-version
 
+# pip-tools https://github.com/jazzband/pip-tools
+requirements.txt
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
