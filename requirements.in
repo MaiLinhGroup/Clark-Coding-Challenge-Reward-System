@@ -1,2 +1,5 @@
 uvicorn[standard]
 fastapi
+python-multipart
+pytest
+requests
