@@ -49,3 +49,13 @@ def test_calculate_score_with_multiple_invitees():
     )
     assert response.status_code == 200
     assert response.json() == {"A": 2.25, "B": 2.5, "C": 1.0}
+
+def test_calculate_score_input_out_of_order():
+    response = test_client.post(
+        "/scoring",
+        files={
+            "file": ("filename", open("out_of_order_input.txt", "rb"), "text/plain"),
+        }
+    )
+    assert response.status_code == 200
+    assert response.json() == {"A": 2.25, "B": 2.5, "C": 1.0}
