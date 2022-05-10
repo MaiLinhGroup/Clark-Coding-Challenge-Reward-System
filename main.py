@@ -1,4 +1,5 @@
 import re
+from collections import deque
 from fastapi import FastAPI, UploadFile, HTTPException
 
 app = FastAPI()
@@ -14,18 +15,18 @@ async def calculate_score(file: UploadFile):
     events = contents.decode().split('\n')
     if len(events) == 1 and events[0] == '':
         raise HTTPException(status_code=400, detail="Input file is empty")
-    return await _calculate_score(events)
+    return await _calculate_score_v2(events)
 
 # service layer
-async def _calculate_score(events: list[str]):
+async def _calculate_score(events: list[str]) -> dict:
     # key: invitee, value: inviter
     referral_record = {}
     # key: inviter, value: score for confirmed invitation
     scoring = {}
 
     # should match either "<inviter> recommends <invitee>" or "<invitee> accepts"
-    recommendation = '(?P<P1>[A-Z])\s{1}recommends\s{1}(?P<P2>[A-Z])$'
-    accept = '(?P<P3>[A-Z])\s{1}accepts$'
+    recommendation = r'(?P<P1>[A-Z])\s{1}recommends\s{1}(?P<P2>[A-Z])$'
+    accept = r'(?P<P3>[A-Z])\s{1}accepts$'
     pattern = re.compile(f'{recommendation}|{accept}')
 
     for event in events:
@@ -39,9 +40,42 @@ async def _calculate_score(events: list[str]):
     return scoring
 
 
-async def reward_referrals(scoring: dict, referral_record: dict, woo: str, k: int):
+async def reward_referrals(scoring: dict, referral_record: dict, woo: str, k: int) -> None:
     beneficiary = referral_record.get(woo)
     if beneficiary is not None:
         scoring[beneficiary] = scoring.get(beneficiary, 0) + 0.5 ** k
-        return await reward_referrals(scoring, referral_record, beneficiary, k + 1)
+        await reward_referrals(scoring, referral_record, beneficiary, k + 1)
     return
+        
+### alternative implementation with deque (double ended queue aka Python's version of linked list)
+async def _calculate_score_v2(events: list[str]) -> dict:
+    # list of referrals
+    referral_graphs = []
+    recommendation = r'(?P<P1>[A-Z])\s{1}recommends\s{1}(?P<P2>[A-Z])$'
+    pattern = re.compile(recommendation)
+    for event in events:
+        recomm_match = re.search(pattern, event)
+        if recomm_match is not None and is_first_invitation_for(recomm_match['P2'], referral_graphs):
+            referral_graphs.append(deque([recomm_match['P1'],recomm_match['P2']]))
+            
+    # find confirmed invitations
+    scoring = {}
+    accept = r'(?P<P3>[A-Z])\s{1}accepts$'
+    pattern = re.compile(accept)
+    for latest_event in reversed(events):
+        accept_match = re.search(pattern, latest_event)
+        if accept_match is not None:
+            await sum_up_score(accept_match['P3'], referral_graphs, scoring, 0)
+
+    return scoring
+
+async def sum_up_score(confirmed_invitee: str, referral_graphs: list, scoring: dict, k: int) -> None:
+    for r in referral_graphs:
+        if r[-1] == confirmed_invitee:
+            beneficiary = r[0]
+            scoring[beneficiary] = scoring.get(beneficiary, 0) + 0.5 ** k
+            await sum_up_score(beneficiary, referral_graphs, scoring, k + 1)
+    return
+
+def is_first_invitation_for(invitee: str, referral_graphs: list) -> bool:
+    return all(r[-1] != invitee for r in referral_graphs)
