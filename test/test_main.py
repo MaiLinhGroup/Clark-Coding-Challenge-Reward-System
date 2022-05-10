@@ -7,7 +7,7 @@ test_client = TestClient(app)
 
 curdir = Path.cwd()
 
-def test_read_root():
+def test_health_check():
     response = test_client.get("/")
     assert response.status_code == 200
     assert response.json() == {"Hello": "World"}
