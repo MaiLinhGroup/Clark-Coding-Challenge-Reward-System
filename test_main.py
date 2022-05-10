@@ -39,3 +39,13 @@ def test_calculate_score_only_first_invitation_counts():
     )
     assert response.status_code == 200
     assert response.json() == {"A": 1.75, "B": 1.5, "C": 1.0}
+
+def test_calculate_score_with_multiple_invitees():
+    response = test_client.post(
+        "/scoring",
+        files={
+            "file": ("filename", open("multiple_invitees_input.txt", "rb"), "text/plain"),
+        }
+    )
+    assert response.status_code == 200
+    assert response.json() == {"A": 2.25, "B": 2.5, "C": 1.0}
