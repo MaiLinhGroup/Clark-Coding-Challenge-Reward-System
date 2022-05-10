@@ -1,5 +1,5 @@
 import re
-from fastapi import FastAPI, UploadFile
+from fastapi import FastAPI, UploadFile, HTTPException
 
 app = FastAPI()
 
@@ -11,7 +11,10 @@ async def read_root():
 @app.post("/scoring")
 async def calculate_score(file: UploadFile):
     contents = await file.read()
-    return await _calculate_score(contents.decode().split('\n'))
+    events = contents.decode().split('\n')
+    if len(events) == 1 and events[0] == '':
+        raise HTTPException(status_code=400, detail="Input file is empty")
+    return await _calculate_score(events)
 
 # service layer
 async def _calculate_score(events: list[str]):
