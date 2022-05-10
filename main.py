@@ -2,14 +2,36 @@ import re
 from collections import deque
 from fastapi import FastAPI, UploadFile, HTTPException
 
-app = FastAPI()
+
+description = """
+ClarkCodingChallenge-RewardSystem API helps you to calculate the score for each user that they gain through direct and indirect referrals. 🚀
+
+## Confirmed Invitations
+
+You can **calculate the score for confirmed invitations** for all participating users.
+"""
+
+app = FastAPI(
+    title="ClarkCodingChallenge-RewardSystem",
+    description=description,
+    version="0.0.1",
+    contact={
+        "name": "Mai Linh Nguyen",
+        "url": "https://github.com/MaiLinhGroup",
+        "email": "MaiLinhGroup@users.noreply.github.com",
+    },
+    )
 
 # routes layer
 @app.get("/")
-async def read_root():
+async def health_check():
     return {"Hello": "World"}
 
-@app.post("/confirmed-invitations/scores")
+@app.post(
+    "/confirmed-invitations/scores",
+    summary="Calculate the score for confirmed invitations",
+    description="For each confirmed invitation, the user who refer/invite the new user to the system receives points. The endpoint calculates the score for each user that they achieve through direct and indirect referrals.",
+)
 async def calculate_score(file: UploadFile):
     contents = await file.read()
     events = contents.decode().split('\n')
