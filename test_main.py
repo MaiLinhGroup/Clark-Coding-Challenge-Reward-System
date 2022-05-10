@@ -12,7 +12,7 @@ def test_read_root():
 
 def test_calculate_score():
     response = test_client.post(
-        "/scoring",
+        "/confirmed-invitations/scores",
         files={
             "file": ("filename", open("input.txt", "rb"), "text/plain"),
         }
@@ -22,7 +22,7 @@ def test_calculate_score():
 
 def test_calculate_score_with_empty_input():
     response = test_client.post(
-        "/scoring",
+        "/confirmed-invitations/scores",
         files={
             "file": ("filename", open("empty_input.txt", "rb"), "text/plain"),
         }
@@ -32,7 +32,7 @@ def test_calculate_score_with_empty_input():
 
 def test_calculate_score_only_first_invitation_counts():
     response = test_client.post(
-        "/scoring",
+        "/confirmed-invitations/scores",
         files={
             "file": ("filename", open("only_first_invite_input.txt", "rb"), "text/plain"),
         }
@@ -42,7 +42,7 @@ def test_calculate_score_only_first_invitation_counts():
 
 def test_calculate_score_with_multiple_invitees():
     response = test_client.post(
-        "/scoring",
+        "/confirmed-invitations/scores",
         files={
             "file": ("filename", open("multiple_invitees_input.txt", "rb"), "text/plain"),
         }
@@ -52,7 +52,7 @@ def test_calculate_score_with_multiple_invitees():
 
 def test_calculate_score_input_out_of_order():
     response = test_client.post(
-        "/scoring",
+        "/confirmed-invitations/scores",
         files={
             "file": ("filename", open("out_of_order_input.txt", "rb"), "text/plain"),
         }

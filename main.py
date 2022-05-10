@@ -9,14 +9,14 @@ app = FastAPI()
 async def read_root():
     return {"Hello": "World"}
 
-@app.post("/scoring")
+@app.post("/confirmed-invitations/scores")
 async def calculate_score(file: UploadFile):
     contents = await file.read()
     events = contents.decode().split('\n')
 
     if len(events) == 1 and events[0] == '':
         raise HTTPException(status_code=400, detail="Input file is empty")
-        
+
     timestamp = r'^([1]\d|[2][0])(\d{2})-([0]\d|[1][0-2])-(0[1-9]|[12]\d|3[01])\s((0\d|1\d|2[0-3])):(0\d|[1-5]\d)'
     pattern = re.compile(timestamp)
     try:
